@@ -1,4 +1,4 @@
-package gr.hua.dit.petCareAthens;
+package gr.hua.dit.petCareAthens.core.model;
 
 import jakarta.persistence.Entity;
 import jakarta.persistence.Id;
@@ -15,12 +15,12 @@ public class Appointment {
     long id;
 
     LocalDateTime date;
-    String status; //TODO enum with status code (ex. 1:completed, 2:cancelled)
+    AppointmentStatus status; //TODO enum with status code (ex. 1:completed, 2:cancelled)
 
     public Appointment(){
 
     }
-    public Appointment(long id, LocalDateTime date, String status){
+    public Appointment(long id, LocalDateTime date, AppointmentStatus status){
         this.id = id;
         this.date = date;
         this.status = status;

@@ -1,4 +1,4 @@
-package gr.hua.dit.petCareAthens;
+package gr.hua.dit.petCareAthens.core.model;
 
 import jakarta.persistence.Entity;
 import jakarta.persistence.Id;
