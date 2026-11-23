@@ -6,7 +6,7 @@ import jakarta.persistence.Table;
 
 @Entity
 @Table(name = "owners")
-public class Owner {
+public class Person {
 
     @Id
     long id;
@@ -15,10 +15,10 @@ public class Owner {
     String email;
     String phone;
 
-    public Owner(){
+    public Person(){
 
     }
-    public Owner(long id, String name, String email, String phone){
+    public Person(long id, String name, String email, String phone){
         this.id = id;
         this.name = name;
         this.email = email;
