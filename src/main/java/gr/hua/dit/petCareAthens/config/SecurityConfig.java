@@ -11,8 +11,12 @@ import org.springframework.security.config.annotation.authentication.configurati
 import org.springframework.security.config.annotation.method.configuration.EnableMethodSecurity;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.http.SessionCreationPolicy;
+import org.springframework.security.core.userdetails.User;
+import org.springframework.security.core.userdetails.UserDetails;
+import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
+import org.springframework.security.provisioning.InMemoryUserDetailsManager;
 import org.springframework.security.web.AuthenticationEntryPoint;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.access.AccessDeniedHandler;
@@ -34,10 +38,11 @@ public class SecurityConfig {
                 session.sessionCreationPolicy(SessionCreationPolicy.STATELESS)
             )
             .authorizeHttpRequests(auth -> auth
-                .requestMatchers("/api/auth/**", "/api/public/**").permitAll()
+                .requestMatchers("/api/public/**").permitAll()
                 .anyRequest().authenticated()
             )
-            // TODO: Προσθήκη JWT OncePerRequestFilter πριν το UsernamePasswordAuthenticationFilter
+            // Προσωρινά httpBasic για εύκολο έλεγχο 401/403 με curl/Postman μέχρι να μπει JWT
+            .httpBasic(basic -> {})
             .exceptionHandling(ex -> ex
                 .authenticationEntryPoint(apiAuthenticationEntryPoint())
                 .accessDeniedHandler(apiAccessDeniedHandler())
@@ -60,23 +65,9 @@ public class SecurityConfig {
                     "/swagger-ui/**",
                     "/swagger-ui.html"
                 ).permitAll()
-                .requestMatchers("/profile", "/pets/**", "/appointments/**").authenticated()
                 .anyRequest().authenticated()
             )
-            .formLogin(form -> form
-                .loginPage("/login")
-                .loginProcessingUrl("/login")
-                .defaultSuccessUrl("/profile", true)
-                .failureUrl("/login?error")
-                .permitAll()
-            )
-            .logout(logout -> logout
-                .logoutUrl("/logout")
-                .logoutSuccessUrl("/login?logout")
-                .deleteCookies("JSESSIONID")
-                .invalidateHttpSession(true)
-                .permitAll()
-            );
+            .httpBasic(basic -> {});
 
         return http.build();
     }
@@ -84,6 +75,24 @@ public class SecurityConfig {
     @Bean
     public PasswordEncoder passwordEncoder() {
         return new BCryptPasswordEncoder();
+    }
+
+    // ΠΡΟΣΩΡΙΝΟ: Μέχρι να συνδεθεί το ApplicationUserDetailsService με το PersonRepository
+    @Bean
+    public UserDetailsService tempUserDetailsService(final PasswordEncoder encoder) {
+        UserDetails owner = User.builder()
+            .username("owner@petcare.gr")
+            .password(encoder.encode("1234"))
+            .roles("OWNER") // αντιστοιχεί στο PersonType.OWNER
+            .build();
+
+        UserDetails vet = User.builder()
+            .username("vet@petcare.gr")
+            .password(encoder.encode("1234"))
+            .roles("VET") // αντιστοιχεί στο PersonType.VET
+            .build();
+
+        return new InMemoryUserDetailsManager(owner, vet);
     }
 
     @Bean
